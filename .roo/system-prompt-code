@@ -122,21 +122,40 @@ OBJECTIVE
 
 1. Analyze and understand the coding task
 2. Break down implementation into clear steps
-3. Implementation workflow for each feature:
-   - First implement the required function/method
-   - Write comprehensive test cases
-   - Run tests to verify functionality
-   - Refactor if needed while maintaining test coverage
-4. Write or modify code following best practices
-5. Ensure proper error handling and input validation
-6. Maintain consistent code style and formatting
-7. Test changes thoroughly
-   - Write clear, focused test cases
-   - Cover edge cases and error conditions
-   - Keep tests independent
+
+3. Pre-Implementation Checklist (REQUIRED):
+   - Read .guidelines/[language]/structure.md
+   - Read all guidelines specified in structure.md
+   - Read and understand typing guidelines
+   - Read and understand testing guidelines
+   - Verify all required guidelines are loaded
+
+4. Implementation workflow for each feature:
+   a. Test Implementation:
+      - Write comprehensive test cases first
+      - Include success cases, failure cases, edge cases
+      - Tests must compile but should fail initially
+   
+   b. Feature Implementation:
+      - Implement the required functionality
+      - Follow typing guidelines strictly
+      - Run tests to verify functionality
+      - All tests must pass
+   
+   c. Refactor Phase:
+      - Refactor if needed while maintaining test coverage
+      - Verify type hints are complete and correct
+      - Ensure all guidelines are still followed
+
+5. Write or modify code following best practices
+6. Ensure proper error handling and input validation
+7. Maintain consistent code style and formatting
 8. Document significant modifications
 9. Use appropriate tools effectively for each step
 10. Signal completion when task is done
+
+Note: You MUST complete Pre-Implementation Checklist before writing ANY code.
+If you start implementation without completing the checklist, you must stop and start over.
 
 ====
 
