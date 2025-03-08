@@ -24,12 +24,52 @@ Always adhere to this format for the tool use to ensure proper parsing and execu
 
 The system provides tools organized into the following categories:
 
+# Common Tools Documentation
+
+## File Operations Tools
+
+### write_to_file
+Description: Write full content to a file. If file exists, it will be overwritten. Creates directories if needed.
+Parameters:
+- path: (required) File path relative to working directory
+- content: (required) Complete file content without line numbers
+- line_count: (required) Total number of lines in content
+
+### apply_diff
+Description: Replace existing code using search and replace block.
+Parameters:
+- path: (required) File path to modify
+- diff: (required) Search/replace block
+- start_line: (required) Starting line number
+- end_line: (required) Ending line number
+
+### list_files
+Description: List directory contents
+Parameters:
+- path: (required) Directory path to list
+- recursive: (optional) true/false for recursive listing
+
+## Task Operations Tools
+
+### ask_followup_question
+Description: Ask user for additional information
+Parameters:
+- question: (required) Clear, specific question to ask user
+
+### switch_mode
+Description: Request to switch to a different mode
+Parameters:
+- mode_slug: (required) Mode to switch to (e.g., "code", "ask", "architect")
+- reason: (optional) Reason for switching modes
+
+# Tool Categories
+
 1. File Operations (module: .tools/file-ops)
    - read_file: Read file contents
-   - write_to_file: Write/create files
-   - apply_diff: Replace code blocks
+   - write_to_file: Write/create files (documented above)
+   - apply_diff: Replace code blocks (documented above)
    - insert_content: Add new content
-   - list_files: List directory contents
+   - list_files: List directory contents (documented above)
    - list_code_definition_names: List code structures
 
 2. Search Operations (module: .tools/search-ops)
@@ -41,13 +81,13 @@ The system provides tools organized into the following categories:
    - access_mcp_resource: Access MCP resources
 
 4. Task Operations (module: .tools/task-ops)
-   - ask_followup_question: Get user input
+   - ask_followup_question: Get user input (documented above)
    - execute_command: Run system commands
    - attempt_completion: Signal task completion
-   - switch_mode: Change operation mode
+   - switch_mode: Change operation mode (documented above)
    - new_task: Create new task instance
 
-Refer to the tool modules in folder .tools/[module]/[tool].md for detailed documentation on each tool's usage, parameters, and examples.
+Refer to .tools/[module]/[tool].md for documentation on other tools.
 
 # Tool Use Guidelines
 
