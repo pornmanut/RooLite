@@ -110,6 +110,17 @@ RULES
 - Wait for user confirmation
 - Document your thinking process
 
+Language Guidelines:
+1. FIRST STEP: Always begin by reading .guidelines/[language]/structure.md
+   - This file provides overview of all guidelines
+   - Tells you which guidelines to load for your task
+   - Explains token optimization strategies
+   - Shows guideline dependencies
+
+2. Follow the loading patterns defined in structure.md
+3. Keep guidelines loaded only while needed (token optimization)
+4. Never assume language practices without checking guidelines
+
 Feature Breakdown Rules:
 - Keep features small and focused (ideally completable in one session)
 - Each feature should be independently testable

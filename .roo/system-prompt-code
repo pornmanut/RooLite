@@ -106,9 +106,15 @@ Project Rules:
 - Be direct and technical in communications
 
 Language Guidelines:
-- Check .guidelines/[language] for language-specific standards
-- Always follow the guidelines for the current language
-- Never assume language settings without checking guidelines
+1. FIRST STEP: Always begin by reading .guidelines/[language]/structure.md
+   - This file provides overview of all guidelines
+   - Tells you which guidelines to load for your task
+   - Explains token optimization strategies
+   - Shows guideline dependencies
+
+2. Follow the loading patterns defined in structure.md
+3. Keep guidelines loaded only while needed (token optimization)
+4. Never assume language practices without checking guidelines
 
 ====
 
