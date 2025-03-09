@@ -15,6 +15,17 @@ class Player:
         # Create a simple rectangle for now
         self.rect = pygame.Rect(int(x), int(y), self.width, self.height)
         self.color = (50, 120, 190)  # Blue-ish color
+        
+        # Outline properties
+        self.outline_thickness = 2
+        self.outline_color = self._calculate_outline_color()
+
+    def _calculate_outline_color(self):
+        """Calculate a contrasting outline color based on fill color"""
+        # Calculate relative luminance using perceived brightness formula
+        luminance = (0.299 * self.color[0] + 0.587 * self.color[1] + 0.114 * self.color[2]) / 255
+        # Use white outline for dark colors, black outline for light colors
+        return (255, 255, 255) if luminance < 0.5 else (0, 0, 0)
 
     def move(self, direction):
         """Handle horizontal movement"""
@@ -50,7 +61,10 @@ class Player:
     def render_at(self, screen, x, y):
         """Draw the player at specified screen coordinates"""
         draw_rect = pygame.Rect(int(x), int(y), self.width, self.height)
+        # Draw filled rectangle
         pygame.draw.rect(screen, self.color, draw_rect)
+        # Draw outline
+        pygame.draw.rect(screen, self.outline_color, draw_rect, self.outline_thickness)
 
     def check_platform_collision(self, platforms):
         """Check and handle collision with platforms"""

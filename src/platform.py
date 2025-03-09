@@ -72,12 +72,23 @@ class Platform:
         self.color = self.COLORS.get(platform_type, self.COLORS['normal'])
         self.fade_duration = 1.5 if self.is_moving else 2.0
         
+        # Outline properties
+        self.outline_thickness = 2
+        self.outline_color = self._calculate_outline_color()
+        
         self.active = True
         self.disappear_timer = None
         self.alpha = 255
         
         self._alpha_surface = None
         self._direction_indicator = None
+
+    def _calculate_outline_color(self):
+        """Calculate a contrasting outline color based on fill color"""
+        # Calculate relative luminance using perceived brightness formula
+        luminance = (0.299 * self.color[0] + 0.587 * self.color[1] + 0.114 * self.color[2]) / 255
+        # Use white outline for dark colors, black outline for light colors
+        return (255, 255, 255) if luminance < 0.5 else (0, 0, 0)
 
     def _create_alpha_surface(self):
         """Create alpha surface only when needed"""
@@ -142,10 +153,19 @@ class Platform:
 
         if self.disappear_timer:
             surface = self._create_alpha_surface()
-            color_with_alpha = (*self.color, int(self.alpha))
             surface.fill((0, 0, 0, 0))
+            
+            # Draw filled rectangle with alpha
+            color_with_alpha = (*self.color, int(self.alpha))
             pygame.draw.rect(surface, color_with_alpha, 
                            (0, 0, self.width, self.height))
+            
+            # Draw outline with alpha
+            outline_with_alpha = (*self.outline_color, int(self.alpha))
+            pygame.draw.rect(surface, outline_with_alpha,
+                           (0, 0, self.width, self.height),
+                           self.outline_thickness)
+            
             screen.blit(surface, (int(x), int(y)))
             
             if self.is_moving and self.alpha > 50:
@@ -155,7 +175,10 @@ class Platform:
                     screen.blit(indicator, (int(x) + self.width//2 - 12, int(y) - 10))
         else:
             draw_rect = pygame.Rect(int(x), int(y), self.width, self.height)
+            # Draw filled rectangle
             pygame.draw.rect(screen, self.color, draw_rect)
+            # Draw outline
+            pygame.draw.rect(screen, self.outline_color, draw_rect, self.outline_thickness)
             
             if self.is_moving:
                 indicator = self._create_direction_indicator()
