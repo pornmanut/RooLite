@@ -22,8 +22,8 @@ PLATFORM_SPACING = MAX_JUMP_HEIGHT * 0.8
 DIFFICULTY_HEIGHT = 2000
 
 # Memory management constants
-CLEANUP_BUFFER = WINDOW_HEIGHT * 2  # How far below view to keep platforms
-MAX_PLATFORMS = 50  # Maximum number of platforms to keep in memory
+CLEANUP_BUFFER = WINDOW_HEIGHT * 2
+MAX_PLATFORMS = 50
 
 # Colors
 WHITE = (255, 255, 255)
@@ -47,9 +47,9 @@ class Game:
         # Create player at the center bottom of the screen
         self.player = Player(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 100)
         
-        # Initialize platforms with memory management
+        # Initialize platforms
         self.platforms = []
-        self.inactive_platforms = []  # Store platforms that are fading out
+        self.inactive_platforms = []
         self.generate_initial_platforms()
 
     def generate_initial_platforms(self):
@@ -58,7 +58,8 @@ class Game:
             WINDOW_WIDTH // 2 - Platform.MAX_WIDTH // 2,
             WINDOW_HEIGHT - 50,
             difficulty=1.0,
-            width=Platform.MAX_WIDTH
+            width=Platform.MAX_WIDTH,
+            platform_type='normal'  # First platform is always static
         )
         self.platforms.append(starting_platform)
         
@@ -75,7 +76,8 @@ class Game:
                 platform = Platform(
                     pos['x'],
                     current_height,
-                    difficulty=pos['difficulty']
+                    difficulty=pos['difficulty'],
+                    platform_type=pos['platform_type']
                 )
                 platform.fade_duration = pos['fade_time']
                 self.platforms.append(platform)
@@ -90,18 +92,17 @@ class Game:
         for platform in self.platforms:
             if not platform.active:
                 self.inactive_platforms.append(platform)
-            elif platform.y < min_height:  # Keep only platforms above min_height
+            elif platform.y < min_height:
                 active_platforms.append(platform)
                 
         self.platforms = active_platforms
         
-        # Clean up inactive platforms that have finished fading
+        # Clean up inactive platforms
         self.inactive_platforms = [p for p in self.inactive_platforms 
                                  if p.alpha > 0 and p.y < min_height]
         
         # Enforce maximum platform limit
         if len(self.platforms) > MAX_PLATFORMS:
-            # Keep the highest platforms
             self.platforms.sort(key=lambda p: p.y)
             self.platforms = self.platforms[:MAX_PLATFORMS]
 
@@ -118,7 +119,8 @@ class Game:
             platform = Platform(
                 pos['x'],
                 new_height,
-                difficulty=pos['difficulty']
+                difficulty=pos['difficulty'],
+                platform_type=pos['platform_type']
             )
             platform.fade_duration = pos['fade_time']
             self.platforms.append(platform)
@@ -164,13 +166,12 @@ class Game:
             self.max_height = -self.player.y
             self.score = int(self.max_height)
         
-        # Check collisions with active platforms only
+        # Check collisions with active platforms
         self.player.check_platform_collision(self.platforms)
         
-        # Update all platforms (active and inactive)
+        # Update all platforms
         for platform in self.inactive_platforms:
             platform.update()
-            
         for platform in self.platforms:
             platform.update()
         
@@ -182,7 +183,7 @@ class Game:
     def render(self):
         self.screen.fill(WHITE)
         
-        # Draw inactive (fading) platforms first
+        # Draw inactive platforms first
         for platform in self.inactive_platforms:
             screen_y = self.camera.apply_offset(platform.y)
             if -50 <= screen_y <= WINDOW_HEIGHT + 50:
