@@ -1,2 +1,21 @@
-venv/
-venv
+# Memory Bank
+memory-bank/
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+*.log
+
+# Dependency directories
+node_modules/
+vendor/
+
+# Environment files
+.env
+.env.*
+!.env.example
