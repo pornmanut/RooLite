@@ -5,6 +5,7 @@ from .player import Player
 from .platform import Platform
 from .camera import Camera
 from .path_manager import PathManager
+from .background_manager import BackgroundManager
 
 # Initialize Pygame
 pygame.init()
@@ -38,11 +39,10 @@ class Game:
         self.score = 0
         self.max_height = 0
         
-        # Initialize camera
+        # Initialize managers
         self.camera = Camera()
-        
-        # Initialize path manager
         self.path_manager = PathManager(WINDOW_WIDTH, PLATFORM_SPACING)
+        self.background_manager = BackgroundManager()
         
         # Create player at the center bottom of the screen
         self.player = Player(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 100)
@@ -181,7 +181,9 @@ class Game:
             self.running = False
 
     def render(self):
-        self.screen.fill(WHITE)
+        # Get background color based on score
+        bg_color = self.background_manager.get_background_color(self.score)
+        self.screen.fill(bg_color)
         
         # Draw inactive platforms first
         for platform in self.inactive_platforms:
