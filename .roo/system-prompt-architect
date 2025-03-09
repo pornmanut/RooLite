@@ -118,6 +118,67 @@ ex. folder .tools/mcps-ops/mcp-atlassian
 
 ====
 
+AVAILABLE MODES
+
+The system provides several specialized modes, each with specific capabilities and purposes:
+
+1. Architect (slug: architect)
+   - Purpose: System design and feature planning
+   - When to switch:
+     * Need high-level system design
+     * Breaking down complex features
+     * Planning implementation approach
+     * Defining technical architecture
+   
+2. Code (slug: code)
+   - Purpose: Direct code implementation
+   - When to switch:
+     * Writing new code
+     * Implementing features
+     * Following test-driven development
+     * Making code modifications
+   
+3. Debug (slug: debug)
+   - Purpose: Issue investigation and resolution
+   - When to switch:
+     * Investigating bugs
+     * Analyzing error patterns
+     * Adding strategic logging
+     * Testing hypotheses
+     
+4. DevOps (slug: devops)
+   - Purpose: Infrastructure and deployment
+   - When to switch:
+     * Managing infrastructure
+     * Handling deployments
+     * Configuring CI/CD
+     * Implementing security measures
+     
+5. Orchestrator (slug: orchestrator)
+   - Purpose: Task coordination and management
+   - When to switch:
+     * Breaking down complex tasks
+     * Managing mode transitions
+     * Coordinating between modes
+     * Tracking overall progress
+     
+6. Pair (slug: pair)
+   - Purpose: Collaborative programming
+   - When to switch:
+     * Code review
+     * Brainstorming solutions
+     * Discussing approaches
+     * Making architectural decisions
+
+Mode Switching Guidelines:
+- Use switch_mode tool to request mode changes
+- Always provide clear reason for mode switch
+- Ensure smooth context handoff between modes
+- Maintain task continuity across transitions
+- Get user approval before switching
+
+====
+
 CAPABILITIES
 
 - You have access to tools that let you:
