@@ -6,6 +6,7 @@ from .platform import Platform
 from .camera import Camera
 from .path_manager import PathManager
 from .background_manager import BackgroundManager
+from .game_over_modal import GameOverModal
 
 # Initialize Pygame
 pygame.init()
@@ -36,6 +37,7 @@ class Game:
         pygame.display.set_caption("Doodle Jump")
         self.clock = pygame.time.Clock()
         self.running = True
+        self.game_over = False
         self.score = 0
         self.max_height = 0
         
@@ -43,6 +45,9 @@ class Game:
         self.camera = Camera()
         self.path_manager = PathManager(WINDOW_WIDTH, PLATFORM_SPACING)
         self.background_manager = BackgroundManager()
+        
+        # Initialize game over modal
+        self.game_over_modal = GameOverModal(WINDOW_WIDTH, WINDOW_HEIGHT)
         
         # Create player at the center bottom of the screen
         self.player = Player(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 100)
@@ -99,7 +104,7 @@ class Game:
         
         # Clean up inactive platforms
         self.inactive_platforms = [p for p in self.inactive_platforms 
-                                 if p.alpha > 0 and p.y < min_height]
+                                if p.alpha > 0 and p.y < min_height]
         
         # Enforce maximum platform limit
         if len(self.platforms) > MAX_PLATFORMS:
@@ -132,14 +137,35 @@ class Game:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.running = False
+            
+            # Handle game over modal events
+            if self.game_over:
+                action = self.game_over_modal.handle_event(event)
+                if action == "retry":
+                    self.reset_game()
+                elif action == "quit":
+                    self.running = False
+                continue
 
-        keys = pygame.key.get_pressed()
-        direction = 0
-        if keys[pygame.K_LEFT]:
-            direction = -1
-        if keys[pygame.K_RIGHT]:
-            direction = 1
-        self.player.move(direction)
+        if not self.game_over:
+            keys = pygame.key.get_pressed()
+            direction = 0
+            if keys[pygame.K_LEFT]:
+                direction = -1
+            if keys[pygame.K_RIGHT]:
+                direction = 1
+            self.player.move(direction)
+
+    def reset_game(self):
+        """Reset the game state for a new game"""
+        self.game_over = False
+        self.score = 0
+        self.max_height = 0
+        self.camera = Camera()
+        self.player = Player(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 100)
+        self.platforms.clear()
+        self.inactive_platforms.clear()
+        self.generate_initial_platforms()
 
     def manage_platforms(self):
         # Clean up platforms periodically
@@ -155,6 +181,9 @@ class Game:
                 highest_y = min(p.y for p in self.platforms)
 
     def update(self):
+        if self.game_over:
+            return
+
         # Update player
         self.player.update()
         
@@ -177,8 +206,10 @@ class Game:
         
         self.manage_platforms()
         
+        # Check for game over
         if self.camera.apply_offset(self.player.y) > WINDOW_HEIGHT + 100:
-            self.running = False
+            self.game_over = True
+            self.game_over_modal.show(self.score)
 
     def render(self):
         # Get background color based on score
@@ -205,6 +236,10 @@ class Game:
         font = pygame.font.Font(None, 36)
         score_text = font.render(f"Score: {self.score}", True, BLACK)
         self.screen.blit(score_text, (10, 10))
+
+        # Draw game over modal if needed
+        if self.game_over:
+            self.game_over_modal.draw(self.screen)
         
         pygame.display.flip()
 
