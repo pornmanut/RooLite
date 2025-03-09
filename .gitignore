@@ -19,3 +19,7 @@ vendor/
 .env
 .env.*
 !.env.example
+
+# venv
+env/
+__pycache__/
