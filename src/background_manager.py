@@ -1,19 +1,35 @@
 class BackgroundManager:
-    # Color definitions
-    LIGHT_BLUE = (135, 206, 235)
-    DARK_BLUE = (0, 0, 139)
-    PURPLE = (128, 0, 128)
-    DARK_PURPLE = (48, 0, 48)
-    BLACK = (0, 0, 0)
+    # Base zone colors
+    BEGINNER_START = (152, 251, 152)    # Pale Green
+    BEGINNER_END = (0, 178, 238)        # Sky Blue
+    
+    INTERMEDIATE_START = (0, 178, 238)   # Sky Blue
+    INTERMEDIATE_END = (147, 112, 219)   # Medium Purple
+    
+    ADVANCED_START = (147, 112, 219)     # Medium Purple
+    ADVANCED_END = (178, 34, 34)         # Firebrick Red
+    
+    EXPERT_START = (178, 34, 34)         # Firebrick Red
+    EXPERT_END = (25, 25, 112)          # Midnight Blue
 
     def __init__(self):
-        # Define color transition points
+        # Define zone boundaries and colors
         self.transition_points = [
-            (0, self.LIGHT_BLUE),
-            (12500, self.DARK_BLUE),
-            (25000, self.PURPLE),
-            (37500, self.DARK_PURPLE),
-            (50000, self.BLACK)
+            # Beginner Zone (0-10000)
+            (0, self.BEGINNER_START),
+            (5000, self.BEGINNER_END),
+            
+            # Intermediate Zone (10001-40000)
+            (10000, self.INTERMEDIATE_START),
+            (25000, self.INTERMEDIATE_END),
+            
+            # Advanced Zone (40001-80000)
+            (40000, self.ADVANCED_START),
+            (60000, self.ADVANCED_END),
+            
+            # Expert Zone (80001+)
+            (80000, self.EXPERT_START),
+            (100000, self.EXPERT_END)
         ]
 
     def interpolate_color(self, color1, color2, factor):
