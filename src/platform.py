@@ -19,8 +19,8 @@ class Platform:
     def __init__(self, x, y, difficulty=1.0, width=None):
         # Determine platform width based on difficulty
         if width is None:
-            base_width = self.MAX_WIDTH - (difficulty * 15)  # Platforms get smaller with difficulty
-            width_variation = random.randint(-10, 10)  # Add some randomness
+            base_width = self.MAX_WIDTH - (difficulty * 15)
+            width_variation = random.randint(-10, 10)
             self.width = max(self.MIN_WIDTH, min(self.MAX_WIDTH, base_width + width_variation))
         else:
             self.width = width
@@ -28,6 +28,8 @@ class Platform:
         self.height = self.DEFAULT_HEIGHT
         self.x = x
         self.y = y
+        
+        # Initialize rect without creating a new surface
         self.rect = pygame.Rect(x, y, self.width, self.height)
         
         # Set color based on platform size
@@ -42,8 +44,17 @@ class Platform:
         
         self.active = True
         self.disappear_timer = None
-        self.fade_duration = 2.0  # Default fade duration
+        self.fade_duration = 2.0
         self.alpha = 255
+        
+        # Cache for alpha surface
+        self._alpha_surface = None
+
+    def _create_alpha_surface(self):
+        """Create alpha surface only when needed"""
+        if self._alpha_surface is None:
+            self._alpha_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+        return self._alpha_surface
 
     def on_collision(self):
         """Called when player collides with platform"""
@@ -56,8 +67,9 @@ class Platform:
             elapsed = time.time() - self.disappear_timer
             if elapsed >= self.fade_duration:
                 self.active = False
+                # Clear cached surface when platform becomes inactive
+                self._alpha_surface = None
             else:
-                # Calculate alpha based on elapsed time
                 self.alpha = 255 * (1 - (elapsed / self.fade_duration))
         
         # Update rectangle position
@@ -74,22 +86,23 @@ class Platform:
             return
 
         if self.disappear_timer:
-            # Create a surface with alpha channel
-            platform_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+            # Use cached alpha surface
+            surface = self._create_alpha_surface()
             color_with_alpha = (*self.color, int(self.alpha))
-            pygame.draw.rect(platform_surface, color_with_alpha, 
+            surface.fill((0, 0, 0, 0))  # Clear surface
+            pygame.draw.rect(surface, color_with_alpha, 
                            (0, 0, self.width, self.height))
-            screen.blit(platform_surface, (x, y))
+            screen.blit(surface, (x, y))
         else:
             draw_rect = pygame.Rect(int(x), int(y), self.width, self.height)
             pygame.draw.rect(screen, self.color, draw_rect)
 
-    @property
-    def is_small(self):
-        """Check if this is a small platform"""
-        return self.platform_type == 'small'
+    def cleanup(self):
+        """Clean up platform resources"""
+        self.active = False
+        if self._alpha_surface:
+            self._alpha_surface = None
 
-    @property
-    def is_large(self):
-        """Check if this is a large platform"""
-        return self.platform_type == 'large'
+    def __del__(self):
+        """Ensure resources are cleaned up"""
+        self.cleanup()

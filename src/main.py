@@ -21,6 +21,10 @@ MAX_JUMP_HEIGHT = (JUMP_FORCE ** 2) / (2 * GRAVITY)
 PLATFORM_SPACING = MAX_JUMP_HEIGHT * 0.8
 DIFFICULTY_HEIGHT = 2000
 
+# Memory management constants
+CLEANUP_BUFFER = WINDOW_HEIGHT * 2  # How far below view to keep platforms
+MAX_PLATFORMS = 50  # Maximum number of platforms to keep in memory
+
 # Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -43,8 +47,9 @@ class Game:
         # Create player at the center bottom of the screen
         self.player = Player(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 100)
         
-        # Initialize platforms
+        # Initialize platforms with memory management
         self.platforms = []
+        self.inactive_platforms = []  # Store platforms that are fading out
         self.generate_initial_platforms()
 
     def generate_initial_platforms(self):
@@ -65,10 +70,7 @@ class Game:
         spacing = PLATFORM_SPACING * 0.8
         
         while current_height > 0:
-            # Get platform positions from path manager
             positions = self.path_manager.get_platform_positions(current_height)
-            
-            # Create platforms
             for pos in positions:
                 platform = Platform(
                     pos['x'],
@@ -77,23 +79,41 @@ class Game:
                 )
                 platform.fade_duration = pos['fade_time']
                 self.platforms.append(platform)
-            
-            # Move up to next height
             current_height -= spacing
+
+    def cleanup_platforms(self):
+        """Remove platforms that are too far below view or inactive"""
+        min_height = self.camera.offset_y + WINDOW_HEIGHT + CLEANUP_BUFFER
+        
+        # Move inactive platforms to separate list
+        active_platforms = []
+        for platform in self.platforms:
+            if not platform.active:
+                self.inactive_platforms.append(platform)
+            elif platform.y < min_height:  # Keep only platforms above min_height
+                active_platforms.append(platform)
+                
+        self.platforms = active_platforms
+        
+        # Clean up inactive platforms that have finished fading
+        self.inactive_platforms = [p for p in self.inactive_platforms 
+                                 if p.alpha > 0 and p.y < min_height]
+        
+        # Enforce maximum platform limit
+        if len(self.platforms) > MAX_PLATFORMS:
+            # Keep the highest platforms
+            self.platforms.sort(key=lambda p: p.y)
+            self.platforms = self.platforms[:MAX_PLATFORMS]
 
     def add_platform(self):
         """Add new platform above the highest existing platform"""
         if not self.platforms:
             return
         
-        # Find the highest platform
         highest_y = min(p.y for p in self.platforms)
         new_height = highest_y - PLATFORM_SPACING * 0.8
         
-        # Get platform positions from path manager
         positions = self.path_manager.get_platform_positions(new_height)
-        
-        # Create new platforms
         for pos in positions:
             platform = Platform(
                 pos['x'],
@@ -120,21 +140,17 @@ class Game:
         self.player.move(direction)
 
     def manage_platforms(self):
-        # Remove platforms that are too far below view
-        min_height = self.camera.offset_y + WINDOW_HEIGHT + 200
-        self.platforms = [p for p in self.platforms 
-                         if p.y < min_height]
-        
-        # Clean up path manager
-        self.path_manager.cleanup(min_height)
+        # Clean up platforms periodically
+        self.cleanup_platforms()
         
         # Generate new platforms when approaching top of view
-        highest_y = min(p.y for p in self.platforms) if self.platforms else 0
-        screen_top = self.camera.offset_y - 100
-        
-        while highest_y > screen_top:
-            self.add_platform()
+        if self.platforms:
             highest_y = min(p.y for p in self.platforms)
+            screen_top = self.camera.offset_y - 100
+            
+            while highest_y > screen_top:
+                self.add_platform()
+                highest_y = min(p.y for p in self.platforms)
 
     def update(self):
         # Update player
@@ -148,15 +164,15 @@ class Game:
             self.max_height = -self.player.y
             self.score = int(self.max_height)
         
-        # Check collisions with platforms
+        # Check collisions with active platforms only
         self.player.check_platform_collision(self.platforms)
         
-        # Update platforms
-        for platform in self.platforms[:]:
+        # Update all platforms (active and inactive)
+        for platform in self.inactive_platforms:
             platform.update()
-            if not platform.active:
-                self.platforms.remove(platform)
-                self.add_platform()
+            
+        for platform in self.platforms:
+            platform.update()
         
         self.manage_platforms()
         
@@ -166,7 +182,13 @@ class Game:
     def render(self):
         self.screen.fill(WHITE)
         
-        # Draw platforms
+        # Draw inactive (fading) platforms first
+        for platform in self.inactive_platforms:
+            screen_y = self.camera.apply_offset(platform.y)
+            if -50 <= screen_y <= WINDOW_HEIGHT + 50:
+                platform.render_at(self.screen, platform.x, screen_y)
+        
+        # Draw active platforms
         for platform in self.platforms:
             screen_y = self.camera.apply_offset(platform.y)
             if -50 <= screen_y <= WINDOW_HEIGHT + 50:
@@ -189,6 +211,11 @@ class Game:
             self.update()
             self.render()
             self.clock.tick(FPS)
+            
+    def __del__(self):
+        """Cleanup when game object is destroyed"""
+        self.platforms.clear()
+        self.inactive_platforms.clear()
 
 def main():
     game = Game()
