@@ -59,6 +59,19 @@ class PathManager:
         base_chance = 0.2 * self.difficulty
         return random.random() < base_chance
 
+    def get_platform_type(self):
+        """Determine platform type with distribution"""
+        # Check for moving platform first
+        moving_type = self.get_moving_platform_type()
+        if moving_type:
+            return moving_type
+            
+        # Static platform distribution
+        if random.random() < 0.3:  # 30% chance for small platforms
+            return 'small'
+        # Default to normal platform
+        return 'normal'
+
     def should_merge(self):
         """Determine if parallel paths should merge"""
         if len(self.paths) <= 1:
@@ -120,7 +133,7 @@ class PathManager:
         for path in self.paths:
             if path.is_viable:
                 x = path.get_next_x(self.window_width)
-                platform_type = self.get_moving_platform_type() or 'normal'
+                platform_type = self.get_platform_type()
                 
                 positions.append({
                     'x': x,
